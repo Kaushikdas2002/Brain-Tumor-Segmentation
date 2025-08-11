@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Segmentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-white text-slate-800">
+    <div id="loaderOverlay" class="loader-overlay hidden">
+        <div class="loader"></div>
+        <p id="loaderText" class="loader-text">Processing, please wait...</p>
+    </div>
+
+    <div id="messageBoxContainer"></div>
+
+    <div class="container mx-auto bg-white p-4 md:p-6 lg:p-8 max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">🧠 Brain Tumor Segmentation</h1>
+            <p class="text-slate-600 mt-2 text-sm md:text-base">Upload NIfTI files (FLAIR, T2, T1CE, T1) to segment brain tumors using a pre-trained ResUNet model.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-4 bg-white p-5 rounded-xl shadow-lg h-fit sticky top-6">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700 border-b pb-2">📤 Upload MRI Modalities</h2>
+                <form id="uploadForm" class="space-y-4">
+                    <div>
+                        <label for="flairFile" class="block text-sm font-medium text-slate-600">FLAIR (.nii, .nii.gz):</label>
+                        <input type="file" id="flairFile" name="flair" accept=".nii,.nii.gz" required class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border file:border-slate-300 file:text-sm file:font-semibold file:bg-slate-50 file:text-blue-600 hover:file:bg-slate-100 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="t2File" class="block text-sm font-medium text-slate-600">T2 (.nii, .nii.gz):</label>
+                        <input type="file" id="t2File" name="t2" accept=".nii,.nii.gz" required class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border file:border-slate-300 file:text-sm file:font-semibold file:bg-slate-50 file:text-blue-600 hover:file:bg-slate-100 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="t1ceFile" class="block text-sm font-medium text-slate-600">T1CE (.nii, .nii.gz):</label>
+                        <input type="file" id="t1ceFile" name="t1ce" accept=".nii,.nii.gz" required class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border file:border-slate-300 file:text-sm file:font-semibold file:bg-slate-50 file:text-blue-600 hover:file:bg-slate-100 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="t1File" class="block text-sm font-medium text-slate-600">T1 (.nii, .nii.gz):</label>
+                        <input type="file" id="t1File" name="t1" accept=".nii,.nii.gz" required class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border file:border-slate-300 file:text-sm file:font-semibold file:bg-slate-50 file:text-blue-600 hover:file:bg-slate-100 cursor-pointer">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        Segment Tumor
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-8 bg-white p-3 md:p-5 rounded-xl shadow-lg space-y-6">
+                <div id="resultsPlaceholder" class="text-center text-slate-500 py-10">
+                     <svg class="mx-auto h-16 w-16 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                    <h3 class="mt-2 text-base font-medium text-slate-700">Awaiting MRI Files</h3>
+                    <p class="mt-1 text-sm text-slate-500">Upload all four MRI modalities and click "Segment Tumor" to view results.</p>
+                </div>
+
+                <div id="sliceViewerSection" class="hidden space-y-4 p-4 border border-slate-200 rounded-lg">
+                    <h2 class="text-xl font-semibold text-slate-700">🖼️ Slice Viewer</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label for="modalitySelect" class="block text-sm font-medium text-slate-600">Modality:</label>
+                            <select id="modalitySelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm bg-white">
+                                <option value="0">FLAIR</option>
+                                <option value="1">T2</option>
+                                <option value="2">T1CE</option>
+                                <option value="3">T1</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="viewSelect" class="block text-sm font-medium text-slate-600">View:</label>
+                            <select id="viewSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm bg-white">
+                                <option value="Axial">Axial</option>
+                                <option value="Coronal">Coronal</option>
+                                <option value="Sagittal">Sagittal</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2 md:col-span-3">
+                             <label for="sliceSlider" class="block text-sm font-medium text-slate-600">Slice: <span id="sliceNumberLabel" class="font-semibold">1</span> / <span id="maxSliceLabel" class="font-semibold">128</span></label>
+                             <input type="range" id="sliceSlider" min="1" max="128" value="1" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="slice-image-container text-center p-2 bg-slate-50 rounded-md">
+                            <h3 class="text-md font-medium text-slate-700 mb-2">Original Slice</h3>
+                            <img id="originalSliceImg" src="https://placehold.co/370x370/e2e8f0/94a3b8?text=Original+Slice" alt="Original Slice" class="rounded-lg shadow mx-auto">
+                            <button id="downloadOriginalSliceBtn" class="mt-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-1.5 px-3 rounded-lg text-xs shadow transition">Download Original</button>
+                        </div>
+                        <div class="slice-image-container text-center p-2 bg-slate-50 rounded-md">
+                            <h3 class="text-md font-medium text-slate-700 mb-2">Segmented Slice</h3>
+                            <img id="segmentedSliceImg" src="https://placehold.co/370x370/e2e8f0/94a3b8?text=Segmented+Slice" alt="Segmented Slice" class="rounded-lg shadow mx-auto">
+                             <button id="downloadSegmentedSliceBtn" class="mt-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-1.5 px-3 rounded-lg text-xs shadow transition">Download Segmented</button>
+                        </div>
+                    </div>
+                     <div class="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 class="text-sm font-semibold text-blue-700 mb-1">Tumor Region Legend:</h4>
+                        <ul class="list-none text-sm space-y-0.5">
+                            <li><span class="inline-block w-3 h-3 mr-2 rounded-sm bg-red-500"></span><span class="font-medium text-slate-700">Enhancing Tumor</span> (Label 3)</li>
+                            <li><span class="inline-block w-3 h-3 mr-2 rounded-sm bg-green-500"></span><span class="font-medium text-slate-700">Edema</span> (Label 2)</li>
+                            <li><span class="inline-block w-3 h-3 mr-2 rounded-sm bg-blue-500"></span><span class="font-medium text-slate-700">Necrotic Core</span> (Label 1)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="videoViewerSection" class="hidden space-y-4 p-4 border border-slate-200 rounded-lg">
+                    <h2 class="text-xl font-semibold text-slate-700">▶️ Video Viewer</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label for="videoModalitySelect" class="block text-sm font-medium text-slate-600">Modality:</label>
+                            <select id="videoModalitySelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm bg-white">
+                                <option value="0">FLAIR</option>
+                                <option value="1" selected>T2</option>
+                                <option value="2">T1CE</option>
+                                <option value="3">T1</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="videoViewSelect" class="block text-sm font-medium text-slate-600">View:</label>
+                            <select id="videoViewSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-sm bg-white">
+                                <option value="Axial">Axial</option>
+                                <option value="Coronal">Coronal</option>
+                                <option value="Sagittal">Sagittal</option>
+                            </select>
+                        </div>
+                        <button id="generateVideoButton" class="sm:col-span-2 md:col-span-1 bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50">
+                            Generate Video
+                        </button>
+                    </div>
+                    <div id="videoPlayerContainer" class="hidden mt-4 text-center">
+                         <video id="segmentationVideo" controls class="w-full max-w-md mx-auto rounded-lg shadow-md border border-slate-300 bg-black"></video>
+                         <p id="videoLoadingText" class="text-slate-600 mt-2 hidden">Generating video, this may take a moment...</p>
+                    </div>
+                </div>
+
+                <div id="percentagesSection" class="hidden space-y-3 p-4 border border-slate-200 rounded-lg">
+                    <h2 class="text-xl font-semibold text-slate-700">📊 Tumor Volume Analysis</h2>
+                    <div id="percentageDetails" class="p-4 bg-indigo-50 rounded-lg shadow-sm border border-indigo-200">
+                        <p class="text-slate-500">Percentage data will appear here after segmentation.</p>
+                    </div>
+                </div>
+
+                <div id="downloadMaskSection" class="hidden pt-4">
+                     <button id="downloadFullMaskButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        💾 Download Full 3D Segmentation Mask (.zip)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
