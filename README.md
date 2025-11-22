@@ -12,7 +12,8 @@ The model processes multimodal MRI scans — **T1, T1CE, T2, FLAIR** — and seg
 
 The pipeline also includes a **Flask-based web interface** for visualization, slice navigation, tumor volume computation, and model inference.
 
-![App Interface](static/images/webSample.png)
+![App Interface](static/images/webSample.png)  
+![Images](/Images.png)
 
 ---
 
@@ -68,9 +69,16 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 | RAM           | 30 GB |
 
 
+### Flow Diagram  
+![Flow Diagram1](static/images/workflow.png) 
+
+### Model Architecture  
 ![Model Architecture](/Model_architecture.png)  
-![Flow Diagram1](static/images/workflow.png)  
+
+### Residual Block  
 ![Residual Block](/Residual_block_architecture.png)  
+
+### Attention Block  
 ![Attention Block](/Attention_block_architecture.png)
 
 ---
