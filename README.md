@@ -98,7 +98,10 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 - Composite loss handles class imbalance  
 
 **Metrics tracked:**  
-Dice • IoU • Sensitivity • Specificity
+• Dice  
+• IoU  
+• Sensitivity  
+• Specificity
 
 The best checkpoint saved as:  
 `model.h5`
