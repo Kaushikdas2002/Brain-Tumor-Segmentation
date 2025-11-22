@@ -30,7 +30,7 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 
 ## 📂 Project Structure
 
-
+```
 ├── data/
 ├── src/
 │   ├── preprocessing/
@@ -44,7 +44,7 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 │   └── app.py
 ├── saved_models/
 └── README.md
-
+```
 
 ---
 
