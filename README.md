@@ -103,9 +103,6 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 • Sensitivity  
 • Specificity
 
-The best checkpoint saved as:  
-`model.h5`
-
 ---
 
 ## 📊 4. Performance Metrics
