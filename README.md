@@ -67,6 +67,12 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 | GPU           | NVIDIA Tesla T4 |
 | RAM           | 30 GB |
 
+
+![Model Architecture](/Model_architecture.png)  
+![Flow Diagram1](static/images/workflow.png)  
+![Residual Block](/Residual_block_architecture.png)  
+![Attention Block](/Attention_block_architecture.png)
+
 ---
 
 ## 🧹 2. Dataset & Preprocessing
@@ -91,7 +97,6 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 - **17%** Validation  
 - **12%** Test  
 
-![Flow Diagram1](static/images/workflow.png)
 
 ---
 
