@@ -91,6 +91,8 @@ The pipeline also includes a **Flask-based web interface** for visualization, sl
 - **17%** Validation  
 - **12%** Test  
 
+![Flow Diagram1](static/images/workflow.png)
+
 ---
 
 ## 🏋️ 3. Training & Validation
