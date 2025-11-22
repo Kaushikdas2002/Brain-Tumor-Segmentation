@@ -12,6 +12,8 @@ The model processes multimodal MRI scans — **T1, T1CE, T2, FLAIR** — and seg
 
 The pipeline also includes a **Flask-based web interface** for visualization, slice navigation, tumor volume computation, and model inference.
 
+![App Interface](static/images/webSample.png)
+
 ---
 
 ## 📌 Features
