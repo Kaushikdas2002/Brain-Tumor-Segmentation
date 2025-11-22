@@ -148,13 +148,17 @@ The best checkpoint saved as:
 
 ## 🏆 6. Comparison with State-of-the-Art
 
-| Method | WT Dice (%) |
-|--------|-------------|
-| ARU-GD (2022) | 91.1 |
-| CBAM-U-Net++ (2023) | 88.64 |
-| 3D dResUNet (2023) | 86.60 |
-| CBAM U-Net (2023) | 90.8 |
-| **Proposed Model** | **91.69** |
+| Year | Method | Dice Score (WT) |
+|------|--------|------------------|
+| 2022 | Attention Res-UNet with Guided Decoder (ARU-GD) | **91.10** |
+| 2023 | Improved DNN with Fast Fuzzy C-Means (FFCM) | **89.74** |
+| 2023 | Improved Residual Network (ResNet) | **86.40** |
+| 2023 | U-Net with Channel & Spatial Attention (CBAM) | **90.80** |
+| 2023 | dResU-Net (3D Residual U-Net) | **86.60** |
+| 2023 | CBAM-U-Net++ | **88.64** |
+| 2023 | Res-Gated-3DUNet with BNet55 Blocks | **86.90** |
+| 2024 | 2D U-Net (T1ce + FLAIR Modality Combination) | **84.81** |
+| **2025** (**Proposed**) | **Improved 3D ResUNet with Attention Gates**| **91.69** |
 
 ✔ **Achieves highest WT Dice among compared methods.**
 
